@@ -927,6 +927,7 @@ test('Log all "verifyConditions" errors', async (t) => {
     repositoryUrl,
     originalRepositoryURL: repositoryUrl,
     tagFormat: `v\${version}`,
+    allowOutdatedBranch: false,
   };
   const options = {
     ...config,
@@ -1595,10 +1596,9 @@ test('Allow to run on outdated version if "allowOutdatedBranch" is specified', a
     fail: stub().resolves(),
   };
 
-  const semanticRelease = requireNoCache('..', {
-    './lib/get-logger': () => t.context.logger,
-    'env-ci': () => ({isCi: true, branch: 'master', isPr: false}),
-  });
+  td.replace('./lib/get-logger', () => t.context.logger);
+  td.replace('env-ci', () => ({isCi: true, branch: 'master', isPr: false}));
+  const semanticRelease = require('..');
 
   t.truthy(
     await semanticRelease(options, {
@@ -1624,10 +1624,9 @@ test('Throw SemanticReleaseError if branch contains local commit', async (t) => 
   await gitPush(repositoryUrl, 'master', {cwd});
   await gitCommits(['Third'], {cwd});
 
-  const semanticRelease = requireNoCache('..', {
-    './lib/get-logger': () => t.context.logger,
-    'env-ci': () => ({isCi: true, branch: 'master', isPr: false}),
-  });
+  td.replace('./lib/get-logger', () => t.context.logger);
+  td.replace('env-ci', () => ({isCi: true, branch: 'master', isPr: false}));
+  const semanticRelease = require('..');
 
   const error = await t.throwsAsync(
     semanticRelease(
@@ -1661,10 +1660,9 @@ test('Throw SemanticReleaseError if local branch does not contain remote tags', 
     ...config,
   };
 
-  const semanticRelease = requireNoCache('..', {
-    './lib/get-logger': () => t.context.logger,
-    'env-ci': () => ({isCi: true, branch: 'master', isPr: false}),
-  });
+  td.replace('./lib/get-logger', () => t.context.logger);
+  td.replace('env-ci', () => ({isCi: true, branch: 'master', isPr: false}));
+  const semanticRelease = require('..');
 
   const error = await t.throwsAsync(
     semanticRelease(options, {
